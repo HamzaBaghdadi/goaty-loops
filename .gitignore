@@ -1,0 +1,6 @@
+/target
+*.bcproj.bak
+/icon.png
+.kilo/
+*.exe.old
+*.exe.new

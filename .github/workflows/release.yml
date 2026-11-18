@@ -1,0 +1,45 @@
+# Builds the Windows app and publishes a GitHub release when a version tag is pushed.
+# Tests run during development, not here.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Same toolchain as development: the GNU target builds a self-contained exe.
+      - name: Rust (stable, windows-gnu)
+        shell: pwsh
+        run: |
+          rustup toolchain install stable-x86_64-pc-windows-gnu --profile minimal
+          rustup default stable-x86_64-pc-windows-gnu
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Build
+        run: cargo build --release --locked -p goaty-loops
+
+      - name: Package
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}"
+          New-Item -ItemType Directory dist | Out-Null
+          Copy-Item target/release/goaty-loops.exe dist/
+          Compress-Archive -Path target/release/goaty-loops.exe, README.md, LICENSE, NOTICE -DestinationPath "dist/GoatyLoops-$tag-windows-x64.zip"
+
+      - name: Publish
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $notes = if (Test-Path RELEASE_NOTES.md) { @("--notes-file", "RELEASE_NOTES.md") } else { @("--generate-notes") }
+          gh release create $tag dist/* --title "Goaty Loops $tag" @notes

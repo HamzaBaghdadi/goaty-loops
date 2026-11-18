@@ -1,0 +1,19 @@
+[workspace]
+members = ["crates/flp", "crates/engine", "crates/app"]
+default-members = ["crates/app"]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+repository = "https://github.com/HamzaBaghdadi/goaty-loops"
+
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[profile.release]
+lto = "thin"

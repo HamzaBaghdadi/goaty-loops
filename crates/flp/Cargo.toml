@@ -1,0 +1,9 @@
+[package]
+name = "goaty-flp"
+description = "Reader/writer for FL Studio project files (.flp)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+thiserror = "2"
